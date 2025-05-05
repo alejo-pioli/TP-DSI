@@ -1,7 +1,9 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { InternshipForm } from "@/components/internship-form"; // Import the form component
 
 export default function RegistrarPasantiaPage() {
   return (
@@ -20,13 +22,8 @@ export default function RegistrarPasantiaPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            Aquí podrás registrar los detalles de una nueva pasantía.
-          </p>
-          {/* Placeholder for the form */}
-          <div className="mt-6 h-64 flex items-center justify-center border border-dashed rounded-md bg-muted/50">
-            <p className="text-muted-foreground">Formulario de registro próximamente...</p>
-          </div>
+           {/* Replace placeholder with the actual form */}
+           <InternshipForm />
         </CardContent>
       </Card>
     </main>
