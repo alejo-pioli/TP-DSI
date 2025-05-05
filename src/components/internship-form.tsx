@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Import Spanish locale for date formatting
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, User } from 'lucide-react'; // Added User icon
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,18 +22,43 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea'; // Import Textarea
+import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useToast } from '@/hooks/use-toast'; // Import useToast
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'; // Import Select components
+import { useToast } from '@/hooks/use-toast';
+
+// Define available careers
+const careers = [
+  'Ingenieria en Sistemas de Información',
+  'Química',
+  'Electromecánica',
+  'Electrónica',
+] as const;
+
+// Define sample student data
+const sampleStudents = [
+  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] },
+  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] },
+  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] },
+  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] },
+  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] },
+];
 
 // Define the schema for the form using Zod
 const formSchema = z.object({
-  nombreEstudiante: z.string().min(2, {
-    message: 'El nombre del estudiante debe tener al menos 2 caracteres.',
+  // Change student field to validate the selected student ID (or name)
+  nombreEstudiante: z.string({
+    required_error: 'Debes seleccionar un estudiante.',
   }),
   empresa: z.string().min(2, {
     message: 'El nombre de la empresa debe tener al menos 2 caracteres.',
@@ -44,19 +69,23 @@ const formSchema = z.object({
   fechaFin: z.date({
     required_error: 'La fecha de fin es obligatoria.',
   }),
-  tutorEmpresa: z.string().min(2, {
-    message: 'El nombre del tutor de la empresa debe tener al menos 2 caracteres.',
-  }),
-  tutorAcademico: z.string().min(2, {
-    message: 'El nombre del tutor académico debe tener al menos 2 caracteres.',
-  }),
-  descripcion: z.string().optional(), // Make description optional
+  descripcion: z.string().optional(), // Keep description optional
+}).refine(data => data.fechaFin >= data.fechaInicio, {
+    message: "La fecha de fin no puede ser anterior a la fecha de inicio.",
+    path: ["fechaFin"], // Point the error to the end date field
 });
+
 
 export type InternshipFormValues = z.infer<typeof formSchema>;
 
 // Default values for the form
-const defaultValues: Partial<InternshipFormValues> = {};
+const defaultValues: Partial<InternshipFormValues> = {
+    nombreEstudiante: undefined, // Default to undefined for Select placeholder
+    empresa: '',
+    fechaInicio: undefined,
+    fechaFin: undefined,
+    descripcion: '',
+};
 
 export function InternshipForm() {
   const { toast } = useToast(); // Initialize useToast
@@ -67,13 +96,18 @@ export function InternshipForm() {
   });
 
   function onSubmit(data: InternshipFormValues) {
-    console.log('Form Submitted:', data);
+    const selectedStudent = sampleStudents.find(s => `${s.nombre} ${s.apellido}` === data.nombreEstudiante);
+    const submittedData = {
+        ...data,
+        estudiante: selectedStudent // Include full student details if needed
+    };
+    console.log('Form Submitted:', submittedData);
     // Here you would typically send the data to your backend or Firestore
     toast({
       title: 'Pasantía Registrada',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+          <code className="text-white">{JSON.stringify(submittedData, null, 2)}</code>
         </pre>
       ),
     });
@@ -84,22 +118,39 @@ export function InternshipForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Student Selection Dropdown */}
         <FormField
           control={form.control}
           name="nombreEstudiante"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre del Estudiante</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Juan Pérez" {...field} />
-              </FormControl>
+              <FormLabel>Estudiante</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un estudiante" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {sampleStudents.map((student) => (
+                    <SelectItem key={student.id} value={`${student.nombre} ${student.apellido}`}>
+                      <div className="flex items-center gap-2">
+                         <User className="h-4 w-4 text-muted-foreground" />
+                         <span>{`${student.nombre} ${student.apellido}`} ({student.carrera})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormDescription>
-                Nombre completo del pasante.
+                Selecciona el pasante de la lista.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Company Name */}
         <FormField
           control={form.control}
           name="empresa"
@@ -116,6 +167,8 @@ export function InternshipForm() {
             </FormItem>
           )}
         />
+
+        {/* Dates */}
          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
            <FormField
             control={form.control}
@@ -147,8 +200,9 @@ export function InternshipForm() {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
+                    //   Disable past dates, allow today
                       disabled={(date) =>
-                        date < new Date(new Date().setHours(0,0,0,0)) // Allow selecting today
+                        date < new Date(new Date().setHours(0,0,0,0))
                       }
                       initialFocus
                       locale={es} // Use Spanish locale in Calendar
@@ -195,8 +249,10 @@ export function InternshipForm() {
                        disabled={(date) => {
                          const startDate = form.watch('fechaInicio');
                          // Disable dates before start date or before today if start date not set
-                         const minDate = startDate ? startDate : new Date(new Date().setHours(0,0,0,0));
-                         return date < minDate;
+                         const minDate = startDate || new Date(new Date().setHours(0,0,0,0));
+                         // Ensure minDate only compares the date part
+                         const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+                         return date < minDateOnly;
                        }}
                       initialFocus
                       locale={es} // Use Spanish locale in Calendar
@@ -204,45 +260,15 @@ export function InternshipForm() {
                   </PopoverContent>
                 </Popover>
                 <FormDescription>
-                  Fecha de finalización de la pasantía.
+                  Fecha de finalización de la pasantía. Debe ser igual o posterior a la fecha de inicio.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="tutorEmpresa"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tutor de la Empresa</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Ana Gómez" {...field} />
-              </FormControl>
-              <FormDescription>
-                Persona de contacto en la empresa.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="tutorAcademico"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tutor Académico</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Prof. Luis Méndez" {...field} />
-              </FormControl>
-              <FormDescription>
-                Profesor responsable de la pasantía.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        {/* Description */}
         <FormField
           control={form.control}
           name="descripcion"
