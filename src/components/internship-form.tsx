@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldValues } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Import Spanish locale for date formatting
@@ -91,6 +91,19 @@ const formSchema = z.object({
     required_error: 'La fecha de fin es obligatoria.',
   }),
   descripcion: z.string().optional(), // Keep description optional
+}).refine(data => data.fechaFin >= data.fechaInicio, {
+    message: "La fecha de fin no puede ser anterior a la fecha de inicio.",
+    path: ["fechaFin"], // Point the error to the end date field
+}).refine(data => {
+    if (!data.fechaInicio || !data.fechaFin) {
+        return true;
+    }
+    const diffTime = Math.abs(data.fechaFin.getTime() - data.fechaInicio.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 7;
+},{
+    message: "La duración de la pasantía debe ser de al menos 7 días.",
+    path: ["fechaFin"], // Point the error to the end date field
 }).refine(data => data.fechaFin >= data.fechaInicio, {
     message: "La fecha de fin no puede ser anterior a la fecha de inicio.",
     path: ["fechaFin"], // Point the error to the end date field
