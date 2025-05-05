@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Import Spanish locale for date formatting
-import { CalendarIcon, User } from 'lucide-react'; // Added User icon
+import { CalendarIcon, User, Briefcase } from 'lucide-react'; // Added User and Briefcase icons
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input'; // Keep Input for potential future use, though not directly for company anymore
 import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
@@ -44,24 +44,44 @@ const careers = [
   'Ingeniería Electromecánica',
   'Ingeniería Electrónica',
 ] as const;
+type Career = typeof careers[number]; // Define Career type
 
 // Define sample student data with updated career names
 const sampleStudents = [
-  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] }, // Ingeniería en Sistemas de Información
-  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] }, // Ingeniería Química
-  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] }, // Ingeniería Electromecánica
-  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] }, // Ingeniería Electrónica
-  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] }, // Ingeniería en Sistemas de Información
+  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] },
+  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] },
+  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] },
+  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] },
+  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] },
 ];
+
+// Define Position interface/type
+interface Position {
+    id: string;
+    nombre: string;
+    carreraIndicada: Career; // Use the Career type
+    empresa: string;
+}
+
+// Define sample position data
+const samplePositions: Position[] = [
+    { id: 'pos1', nombre: 'Desarrollador Frontend Jr.', carreraIndicada: careers[0], empresa: 'Tech Solutions S.A.' },
+    { id: 'pos2', nombre: 'Analista de Procesos Químicos', carreraIndicada: careers[1], empresa: 'Química Industrial SRL' },
+    { id: 'pos3', nombre: 'Técnico de Mantenimiento', carreraIndicada: careers[2], empresa: 'Metalúrgica Central' },
+    { id: 'pos4', nombre: 'Pasante de Diseño Electrónico', carreraIndicada: careers[3], empresa: 'Innovatech Electronics' },
+    { id: 'pos5', nombre: 'Desarrollador Backend Jr.', carreraIndicada: careers[0], empresa: 'Global Software Inc.' },
+    { id: 'pos6', nombre: 'Ingeniero de Planta', carreraIndicada: careers[1], empresa: 'Petroquímica del Sur' },
+];
+
 
 // Define the schema for the form using Zod
 const formSchema = z.object({
-  // Change student field to validate the selected student ID (or name)
   nombreEstudiante: z.string({
     required_error: 'Debes seleccionar un estudiante.',
   }),
-  empresa: z.string().min(2, {
-    message: 'El nombre de la empresa debe tener al menos 2 caracteres.',
+  // Replace empresa with puestoId
+  puestoId: z.string({
+    required_error: 'Debes seleccionar un puesto.',
   }),
   fechaInicio: z.date({
     required_error: 'La fecha de inicio es obligatoria.',
@@ -80,8 +100,8 @@ export type InternshipFormValues = z.infer<typeof formSchema>;
 
 // Default values for the form
 const defaultValues: Partial<InternshipFormValues> = {
-    nombreEstudiante: undefined, // Default to undefined for Select placeholder
-    empresa: '',
+    nombreEstudiante: undefined,
+    puestoId: undefined, // Default puestoId to undefined
     fechaInicio: undefined,
     fechaFin: undefined,
     descripcion: '',
@@ -97,10 +117,17 @@ export function InternshipForm() {
 
   function onSubmit(data: InternshipFormValues) {
     const selectedStudent = sampleStudents.find(s => `${s.nombre} ${s.apellido}` === data.nombreEstudiante);
+    const selectedPosition = samplePositions.find(p => p.id === data.puestoId); // Find selected position
+
+    // Prepare submitted data including full student and position details
     const submittedData = {
-        ...data,
-        estudiante: selectedStudent // Include full student details if needed
+        estudiante: selectedStudent, // Include full student details
+        puesto: selectedPosition,    // Include full position details
+        fechaInicio: data.fechaInicio,
+        fechaFin: data.fechaFin,
+        descripcion: data.descripcion,
     };
+
     console.log('Form Submitted:', submittedData);
     // Here you would typically send the data to your backend or Firestore
     toast({
@@ -150,18 +177,37 @@ export function InternshipForm() {
           )}
         />
 
-        {/* Company Name */}
+        {/* Position Selection Dropdown */}
         <FormField
           control={form.control}
-          name="empresa"
+          name="puestoId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Empresa</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Acme Corp" {...field} />
-              </FormControl>
+              <FormLabel>Puesto</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un puesto" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {samplePositions.map((position) => (
+                    <SelectItem key={position.id} value={position.id}>
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{position.nombre}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground pl-6">
+                          {position.empresa} - {position.carreraIndicada}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormDescription>
-                Nombre de la empresa donde se realiza la pasantía.
+                Selecciona el puesto ofrecido por la empresa.
               </FormDescription>
               <FormMessage />
             </FormItem>
