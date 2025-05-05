@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'; // Import Select components
 import { useToast } from '@/hooks/use-toast';
+import type { RegisteredInternship } from '@/types/internship'; // Import the shared type
 
 // Define available careers with updated names
 const careers = [
@@ -107,6 +108,8 @@ const defaultValues: Partial<InternshipFormValues> = {
     descripcion: '',
 };
 
+const LOCAL_STORAGE_KEY = 'registeredInternships';
+
 export function InternshipForm() {
   const { toast } = useToast(); // Initialize useToast
   const form = useForm<InternshipFormValues>({
@@ -119,27 +122,51 @@ export function InternshipForm() {
     const selectedStudent = sampleStudents.find(s => `${s.nombre} ${s.apellido}` === data.nombreEstudiante);
     const selectedPosition = samplePositions.find(p => p.id === data.puestoId); // Find selected position
 
+    if (!selectedStudent || !selectedPosition) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Estudiante o puesto no encontrado. Por favor, inténtalo de nuevo.",
+      });
+      return;
+    }
+
     // Prepare submitted data including full student and position details
-    const submittedData = {
+    const newInternship: RegisteredInternship = {
+        id: Date.now().toString(), // Simple unique ID
         estudiante: selectedStudent, // Include full student details
         puesto: selectedPosition,    // Include full position details
-        fechaInicio: data.fechaInicio,
-        fechaFin: data.fechaFin,
-        descripcion: data.descripcion,
+        fechaInicio: data.fechaInicio.toISOString(), // Store as ISO string
+        fechaFin: data.fechaFin.toISOString(), // Store as ISO string
+        descripcion: data.descripcion || '', // Ensure description is always a string
     };
 
-    console.log('Form Submitted:', submittedData);
-    // Here you would typically send the data to your backend or Firestore
-    toast({
-      title: 'Pasantía Registrada',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(submittedData, null, 2)}</code>
-        </pre>
-      ),
-    });
-     // Reset form after successful submission
-    form.reset(defaultValues);
+    try {
+      // Retrieve existing internships from localStorage
+      const existingInternshipsString = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const existingInternships: RegisteredInternship[] = existingInternshipsString
+        ? JSON.parse(existingInternshipsString)
+        : [];
+
+      // Add the new internship and save back to localStorage
+      const updatedInternships = [...existingInternships, newInternship];
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedInternships));
+
+      console.log('Form Submitted and Saved:', newInternship);
+      toast({
+        title: 'Pasantía Registrada Localmente',
+        description: `La pasantía para ${newInternship.estudiante.nombre} ${newInternship.estudiante.apellido} ha sido guardada.`,
+      });
+       // Reset form after successful submission
+      form.reset(defaultValues);
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+      toast({
+        variant: "destructive",
+        title: 'Error al Guardar',
+        description: 'No se pudo guardar la pasantía en el almacenamiento local.',
+      });
+    }
   }
 
   return (
@@ -326,6 +353,7 @@ export function InternshipForm() {
                   placeholder="Describe brevemente las tareas o el proyecto de la pasantía..."
                   className="resize-y min-h-[100px]" // Allow vertical resize
                   {...field}
+                  value={field.value ?? ''} // Ensure value is not null/undefined
                 />
               </FormControl>
               <FormDescription>
@@ -343,4 +371,3 @@ export function InternshipForm() {
     </Form>
   );
 }
-
