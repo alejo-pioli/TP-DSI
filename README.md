@@ -1,5 +1,3 @@
-# Firebase Studio
+Sistema de pasantías
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+Creado con Firebase Studio
