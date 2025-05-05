@@ -37,21 +37,21 @@ import {
 } from '@/components/ui/select'; // Import Select components
 import { useToast } from '@/hooks/use-toast';
 
-// Define available careers
+// Define available careers with updated names
 const careers = [
-  'Ingenieria en Sistemas de Información',
-  'Química',
-  'Electromecánica',
-  'Electrónica',
+  'Ingeniería en Sistemas de Información',
+  'Ingeniería Química',
+  'Ingeniería Electromecánica',
+  'Ingeniería Electrónica',
 ] as const;
 
-// Define sample student data
+// Define sample student data with updated career names
 const sampleStudents = [
-  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] },
-  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] },
-  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] },
-  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] },
-  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] },
+  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] }, // Ingeniería en Sistemas de Información
+  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] }, // Ingeniería Química
+  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] }, // Ingeniería Electromecánica
+  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] }, // Ingeniería Electrónica
+  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] }, // Ingeniería en Sistemas de Información
 ];
 
 // Define the schema for the form using Zod
@@ -297,3 +297,4 @@ export function InternshipForm() {
     </Form>
   );
 }
+
