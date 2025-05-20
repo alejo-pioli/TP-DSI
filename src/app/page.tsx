@@ -12,6 +12,16 @@ export default function Home() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-6 pt-4">
+          <Link href="/registrar-alumno" passHref legacyBehavior>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="w-full btn-hover-effect shadow-md"
+              aria-label="Registrar nuevo alumno"
+            >
+              Registrar alumno
+            </Button>
+          </Link>
           <Link href="/registrar-pasantia" passHref legacyBehavior>
             <Button
               size="lg"

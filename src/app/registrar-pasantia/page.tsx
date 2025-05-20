@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { InternshipForm } from "@/components/internship-form"; // Import the form component
 
+// This page component now serves as a wrapper and handles data fetching if needed later
 export default function RegistrarPasantiaPage() {
   return (
     <main className="flex min-h-screen flex-col items-center p-6 bg-background">
@@ -22,7 +23,8 @@ export default function RegistrarPasantiaPage() {
           </div>
         </CardHeader>
         <CardContent>
-           {/* Replace placeholder with the actual form */}
+           {/* The InternshipForm component will handle fetching and displaying
+               student data from localStorage */}
            <InternshipForm />
         </CardContent>
       </Card>

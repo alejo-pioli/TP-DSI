@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, type FieldValues } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Import Spanish locale for date formatting
@@ -31,6 +31,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup, // Import SelectGroup for grouping options
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -47,15 +48,13 @@ const careers = [
 ] as const;
 type Career = typeof careers[number]; // Define Career type
 
-// Define sample student data with updated career names
-const sampleStudents = [
-  { id: '1', nombre: 'Juan', apellido: 'Pérez', carrera: careers[0] },
-  { id: '2', nombre: 'Ana', apellido: 'García', carrera: careers[1] },
-  { id: '3', nombre: 'Luis', apellido: 'Martínez', carrera: careers[2] },
-  { id: '4', nombre: 'María', apellido: 'Rodríguez', carrera: careers[3] },
-  { id: '5', nombre: 'Carlos', apellido: 'López', carrera: careers[0] },
-];
-
+// Define Student interface/type matching the one used in registrar-alumno
+interface Student {
+  nombre: string;
+  apellido: string;
+  legajo: number; // Assuming legajo is a number
+  carrera: string; // Assuming carrera is a string
+}
 // Define Position interface/type
 interface Position {
     id: string;
@@ -125,6 +124,17 @@ const LOCAL_STORAGE_KEY = 'registeredInternships';
 
 export function InternshipForm() {
   const { toast } = useToast(); // Initialize useToast
+  const [students, setStudents] = React.useState<Student[]>([]); // State to hold students from localStorage
+
+  // Load students from localStorage on component mount
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedStudents = localStorage.getItem('students');
+      if (storedStudents) {
+        setStudents(JSON.parse(storedStudents));
+      }
+    }
+  }, []);
   const form = useForm<InternshipFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -132,7 +142,7 @@ export function InternshipForm() {
   });
 
   function onSubmit(data: InternshipFormValues) {
-    const selectedStudent = sampleStudents.find(s => `${s.nombre} ${s.apellido}` === data.nombreEstudiante);
+    const selectedStudent = students.find(s => `${s.nombre} ${s.apellido}` === data.nombreEstudiante); // Find student from the loaded students
     const selectedPosition = samplePositions.find(p => p.id === data.puestoId); // Find selected position
 
     if (!selectedStudent || !selectedPosition) {
@@ -198,15 +208,21 @@ export function InternshipForm() {
                     <SelectValue placeholder="Selecciona un estudiante" />
                   </SelectTrigger>
                 </FormControl>
+
                 <SelectContent>
-                  {sampleStudents.map((student) => (
-                    <SelectItem key={student.id} value={`${student.nombre} ${student.apellido}`}>
-                      <div className="flex items-center gap-2">
-                         <User className="h-4 w-4 text-muted-foreground" />
-                         <span>{`${student.nombre} ${student.apellido}`} ({student.carrera})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                   {students.length > 0 ? (
+                    students.map((student) => (
+                      // Using legajo as key as it's expected to be unique
+                      <SelectItem key={student.legajo} value={`${student.nombre} ${student.apellido}`}>
+                        <div className="flex items-center gap-2">
+                           <User className="h-4 w-4 text-muted-foreground" />
+                           <span>{`${student.nombre} ${student.apellido}`} ({student.carrera})</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                   ) : (
+                     <SelectItem value="no-students" disabled>No hay alumnos registrados</SelectItem>
+                   )}
                 </SelectContent>
               </Select>
               <FormDescription>
