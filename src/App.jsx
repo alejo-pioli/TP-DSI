@@ -7,7 +7,7 @@ export default function App() {
     <div className="container">
       <h1 className="text-center mt-5"><strong>Sistema de gestión de pasantías</strong></h1>
       <div className="d-grid gap-2 mt-4">
-        <Button size="lg" as={Link} to={"/crear-alumno"}>Crear alumno</Button>
+        <Button size="lg" as={Link} to={"/crear-pasantia"}>Registrar pasantía</Button>
       </div>
     </div>
   )
