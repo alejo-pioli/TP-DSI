@@ -9,6 +9,7 @@ export default function App() {
       <div className="d-grid gap-2 mt-4">
         <Button size="lg" as={Link} to={"/crear-pasantia"}>Registrar pasantía</Button>
         <Button size="lg" as={Link} to={"/crear-alumno"}>Registrar alumno</Button>
+        <Button size="lg" as={Link} to={"/crear-empresa"}>Registrar empresa</Button>
       </div>
     </div>
   )

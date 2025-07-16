@@ -107,7 +107,7 @@ export default function CrearPasantia() {
                 <Button as={Link} to={"/"}>Volver</Button>
                 <h1 className="text-center"><strong>Registrar pasantía</strong></h1>
             </div>
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} autoComplete="off">
                 <Form.Group controlId="alumno" className="mb-3">
                     <Form.Label>Alumno</Form.Label>
                     <Form.Select defaultValue="" name="alumno" required>
