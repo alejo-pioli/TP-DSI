@@ -31,7 +31,7 @@ export default function CrearAlumno() {
         <div className="container">
             <div className="mt-5">
                 <Button as={Link} to={"/"}>Volver</Button>
-                <h1 className="text-center"><strong>Registrar pasantía</strong></h1>
+                <h1 className="text-center"><strong>Registrar alumno</strong></h1>
             </div>
             <Form onSubmit={handleSubmit} autoComplete='off'>
                 <Row>

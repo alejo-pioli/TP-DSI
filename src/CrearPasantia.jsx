@@ -3,59 +3,6 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 
 export default function CrearPasantia() {
-
-    localStorage.setItem("puestos", JSON.stringify([
-        {
-            "id": 106,
-            "nombre": "Desarrollador Backend Jr.",
-            "carrera": "Ingeniería en Sistemas de Información",
-            "idEmpresa": 11,
-            "empresa": "Global Software Inc"
-        },
-        {
-            "id": 107,
-            "nombre": "Asistente de Procesos Químicos",
-            "carrera": "Ingeniería Química",
-            "idEmpresa": 21,
-            "empresa": "ChemSolutions S.A."
-        },
-        {
-            "id": 108,
-            "nombre": "Analista de Producción Industrial",
-            "carrera": "Ingeniería Industrial",
-            "idEmpresa": 22,
-            "empresa": "Industrias Nova SRL"
-        },
-        {
-            "id": 109,
-            "nombre": "Técnico de Soporte Electrónico",
-            "carrera": "Ingeniería Electrónica",
-            "idEmpresa": 23,
-            "empresa": "ElectroSystems Ltda."
-        },
-        {
-            "id": 110,
-            "nombre": "Asistente de Mantenimiento Electromecánico",
-            "carrera": "Ingeniería Electromecánica",
-            "idEmpresa": 24,
-            "empresa": "MecanoTech Corp."
-        },
-        {
-            "id": 111,
-            "nombre": "Especialista en Automatización de Procesos",
-            "carrera": "Ingeniería Electrónica",
-            "idEmpresa": 25,
-            "empresa": "Automatix Solutions"
-        },
-        {
-            "id": 112,
-            "nombre": "Planificador de Operaciones Industriales",
-            "carrera": "Ingeniería Industrial",
-            "idEmpresa": 26,
-            "empresa": "SmartIndustria Global"
-        }
-    ]))
-
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
     const [startDate, setStartDate] = useState(todayStr)
@@ -111,7 +58,7 @@ export default function CrearPasantia() {
                 <Form.Group controlId="alumno" className="mb-3">
                     <Form.Label>Alumno</Form.Label>
                     <Form.Select defaultValue="" name="alumno" required>
-                        <option value="">Seleccione un alumno</option>
+                        <option disabled value="">Seleccione un alumno</option>
                         {alumnos.map((alumno) =>
                             <option value={alumno.legajo}>{alumno.nombre} {alumno.apellido} ({alumno.carrera})</option>
                         )}
@@ -121,7 +68,7 @@ export default function CrearPasantia() {
                 <Form.Group controlId="puesto" className="mb-3">
                     <Form.Label>Puesto</Form.Label>
                     <Form.Select defaultValue="" name="puesto" required>
-                        <option value="">Seleccione un puesto</option>
+                        <option disabled value="">Seleccione un puesto</option>
                         {puestos.map((puesto) =>
                             <option value={puesto.id}>{puesto.nombre} ({puesto.carrera} - {puesto.empresa})</option>
                         )}
